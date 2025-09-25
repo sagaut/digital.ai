@@ -1,0 +1,41 @@
+# Exported from:        http://digitalai.wureachprod.awswuintranet.net/
+# Release version:      25.1.1-512.313
+# Date created:         Thu Sep 25 07:44:06 GMT 2025
+
+---
+apiVersion: xl-release/v1
+kind: Templates
+metadata:
+  path: /
+  home: Samples & Tutorials
+spec:
+- template: ansible_snow_validation_template
+  scheduledStartDate: 2024-12-06T03:30:00Z
+  phases:
+  - phase: New Phase
+    tasks:
+    - name: Test_snow_job
+      type: wu.AnsibleControllerLaunchAndWait
+      ansibletower: Ansible SRE
+      apiToken: !value "wu_AnsibleControllerLaunchAndWait_Test_snow_job_apiToken"
+      job_template_id: "572"
+      extra_vars: "{     \"CR_number\": \"${ CR_number }\",     \"user\": \"${ user}\"\
+        \   }"
+      inventory: "4"
+  variables:
+  - type: xlrelease.StringVariable
+    key: CR_number
+    label: CRNumber
+    description: "A string that represents a JSON or YAML formatted dictionary (with\
+      \ escaped parentheses) which includes variables given by the user, including\
+      \ answers to survey questions"
+    value: CHG0291586
+  - type: xlrelease.StringVariable
+    key: user
+    label: useremail
+    description: "A string that represents a JSON or YAML formatted dictionary (with\
+      \ escaped parentheses) which includes variables given by the user, including\
+      \ answers to survey questions"
+    value: Srinu.Talari@wu.com
+  riskProfile: Default risk profile
+  author: admin

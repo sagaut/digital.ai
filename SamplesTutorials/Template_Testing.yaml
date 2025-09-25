@@ -1,0 +1,543 @@
+# Exported from:        http://digitalai.wureachprod.awswuintranet.net/
+# Release version:      25.1.1-512.313
+# Date created:         Thu Sep 25 07:44:05 GMT 2025
+
+---
+apiVersion: xl-release/v1
+kind: Templates
+metadata:
+  path: /
+  home: Samples & Tutorials
+spec:
+- template: Testing
+  scheduledStartDate: 2025-09-18T03:30:00Z
+  phases:
+  - phase: DEV
+    tasks:
+    - name: Setup environment
+      type: xlrelease.ScriptTask
+      description: Test description
+      team: Release Admin
+      precondition: True == True
+      script: |-
+        from com.xebialabs.xlrelease.domain.status import PhaseStatus
+        releaseVariables['currentenvironment'] = "DEV"
+        curEnv = releaseVariables['currentenvironment']
+
+        current_phase_id = phase.id
+        current_phase_title = phase.title
+
+        current_task_id = task.id
+        current_task_title = task.title
+
+        print "Current Phase ID: %s Phase title: %s" % (current_phase_id, current_phase_title)
+        print "Current Task ID: %s Task title: %s" % (current_task_id, current_task_title)
+
+        # Save them as release variables for later use
+        releaseVariables['captured_phase_id'] = current_phase_id
+        releaseVariables['captured_task_id'] = current_task_id
+        releaseVariables['captured_phase_title'] = current_phase_title
+        releaseVariables['captured_task_title'] = current_task_title
+
+        if curEnv in releaseVariables['environments']:
+          redeploymenttodevrequired = True
+
+        releaseVariables['redeploymentto' + curEnv.lower() + 'required'] = redeploymenttodevrequired
+
+        print "Deployment to environment: ", curEnv.lower(), " required? ", redeploymenttodevrequired
+    - name: "${task_serviceconfiguration_title}"
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      team: Release Admin
+      precondition: "${redeploymenttodevrequired} == True"
+      variables:
+      - environments
+    - name: "${task_spinnaker_title}"
+      type: xlrelease.ScriptTask
+      precondition: "${redeploymenttodevrequired} == True"
+      script: print "Hello World"
+    - name: "${task_triage_title}"
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      team: Release Admin
+      precondition: "${redeploymenttodevrequired} == True"
+      variables:
+      - redeploymenttodevrequired
+      - onlyrestarttask
+    - name: "${task_restartphase_title}"
+      type: xlrelease.ScriptTask
+      precondition: "${onlyrestarttask} is False and ${redeploymenttodevrequired}\
+        \ == True"
+      script: |-
+        from com.xebialabs.xlrelease.api.v1 import ReleaseApi
+        from com.xebialabs.xlrelease.api.v1 import TaskApi
+        from com.xebialabs.xlrelease.repository import PhaseVersion
+
+        # Current release ID is always available
+        release_id = release.id
+
+        phase_id =  '${captured_phase_id}'
+        phase_title =  '${captured_phase_title}'
+        task_id =  '${captured_task_id}'
+        task_title =  '${captured_task_title}'
+
+        target_phase = phaseApi.getPhase(phase_id)
+        target_task = taskApi.getTask(task_id)
+
+        # Restart the phase
+        print "Attempting to restart the phase and task with phaseId: %s phase title: %s taskId: %s task title: %s" % (phase_id, phase_title, task_id, task_title)
+        releaseApi.restartPhase(release, target_phase, target_task, PhaseVersion.LATEST, True)
+    - name: "${task_clonetask_title}"
+      type: xlrelease.ScriptTask
+      description: Test description only
+      team: Release Admin
+      precondition: "${onlyrestarttask} is True and ${redeploymenttodevrequired} ==\
+        \ True"
+      script: |-
+        from com.xebialabs.xlrelease.api.v1 import TaskApi
+
+        redeploymentcount = releaseVariables["redeploymentcount"]
+        position = -1;
+        tasks = task.getPhase().getTasks()
+        for idx, t in enumerate(tasks):
+          if t.getId() == task.getId():
+            position = idx
+            break
+
+        def get_task_id_by_task_title(title):
+          for t in task.getPhase().getTasks():
+            if t.title == title:
+              return t.id
+          return None
+
+        for ph in release.getPhases():
+          if ph.getTitle() == "RELEASE USE ONLY":
+            placeholderPhase = ph
+            break
+
+        if placeholderPhase:
+          print "Placeholder phase found"
+        else:
+          raise Exception("Placeholder phase not found")
+
+        for idx, sourceTask in enumerate(placeholderPhase.getTasks()):
+          newTitle = sourceTask.getTitle()
+          print ("Cloning task: ", newTitle)
+          position = position + 1
+          clonedTask = taskApi.copyTask(sourceTask.getId(), task.getPhase().getId(), position)
+          modifiedTitle = newTitle.replace(" (Copy)", "")
+          modifiedTitle = modifiedTitle + " (Redeployment iteration " + str(${redeploymentcount}) + ")
+          clonedTask.setTitle(modifiedTitle)
+          taskApi.updateTask(clonedTask)
+
+        redeploymentcount = redeploymentcount + 1
+        releaseVariables["redeploymentcount"] = redeploymentcount
+        print "Cloned task created successfully"
+        print 'Task completed'
+    - name: Ignore
+      type: xlrelease.ScriptTask
+      precondition: "${onlyrestarttask} is True"
+      script: |-
+        from com.xebialabs.xlrelease.api.v1 import ReleaseApi
+        from com.xebialabs.xlrelease.api.v1 import TaskApi
+        from com.xebialabs.xlrelease.repository import PhaseVersion
+
+        # Current release ID is always available
+        release_id = release.id
+
+        phase_id =  '${captured_phase_id}'
+        phase_title =  '${captured_phase_title}'
+        task_id =  '${captured_task_id}'
+        task_title =  '${captured_task_title}'
+
+        target_phase = phaseApi.getPhase(phase_id)
+        target_task = taskApi.getTask(task_id)
+
+        found_task_id = None
+
+        #def get_task_id_by_task_title(phase, title):
+        #  for t in phase:
+        #    if t.title == title:
+        #      return t.id
+        #  return None
+
+        #task_spinnaker_title_id = get_task_id_by_task_title(target_phase, "Trigger Spinnaker pipeline")
+        #task_triage_title_id = get_task_id_by_task_title(target_phase, 'Triage')
+        #task_clonetask_title_id = get_task_id_by_task_title(target_phase, 'Clone task')
+        #task_restartphase_title_id = get_task_id_by_task_title(target_phase, 'Restart phase')
+
+        for t in target_phase.tasks:
+          if t.title == 'Trigger Spinnaker pipeline':
+            found_task_id = t.id
+
+        new_task = taskApi.copyTask(found_task_id, phase_id, -1)
+
+        print
+    - name: "${task_clonetask_title} (copy)"
+      type: xlrelease.ScriptTask
+      description: Test description only
+      team: Release Admin
+      precondition: "${onlyrestarttask} is True"
+      script: |-
+        from com.xebialabs.xlrelease.api.v1 import TaskApi
+
+        position = -1;
+        tasks = task.getPhase().getTasks()
+        for idx, t in enumerate(tasks):
+          if t.getId() == task.getId():
+            position = idx
+            break
+
+        print "Current Task position: ", position
+
+        def CloneTasks(task_to_be_cloned, target_position):
+          # Clone the current task inside the same phase
+          sourceTask = task_to_be_cloned
+          targetPhase = sourceTask.getPhase()
+
+          print "Cloning task:", sourceTask.getTitle(), "(", sourceTask.getType(), ")"
+
+          # Create new task object using the release API
+          taskType = str(sourceTask.getType())
+          print "Source task type: ", taskType
+          clonedTask = taskApi.newTask(taskType)
+
+          # Copy common fields
+          clonedTask.setTitle("Clone of - " + sourceTask.getTitle())
+
+          if sourceTask.getDescription():
+              clonedTask.setDescription(sourceTask.getDescription())
+              print "Description in cloned task: ", clonedTask.Description()
+
+          if sourceTask.getOwner():
+              clonedTask.setOwner(sourceTask.getOwner())
+              print "Owner in cloned task: ", clonedTask.Owner()
+
+          # Type-specific fields
+          if str(sourceTask.getType()) == "xlrelease.ScriptTask":
+              if hasattr(sourceTask, "getScript") and sourceTask.getScript():
+                  clonedTask.setScript(sourceTask.getScript())
+                  print "Cloned task script: ", clonedTask.script
+
+          elif str(sourceTask.getType()) == "xlrelease.UserInputTask":
+              # Copy variables (form fields)
+              for key, value in sourceTask.getVariables().items():
+                  clonedTask.getVariables()[key] = value
+              # Copy prefilled input properties if present
+              if hasattr(sourceTask, "getInputProperties"):
+                  for key, value in sourceTask.getInputProperties().items():
+                      clonedTask.getInputProperties()[key] = value
+              # Copy labels
+              if sourceTask.getLabels():
+                  clonedTask.setLabels(sourceTask.getLabels())
+
+          # Add cloned task to the phase
+          phaseApi.addTask(targetPhase.id, clonedTask, target_position)
+
+          print "Cloned task created successfully"
+          print "Title:", clonedTask.getTitle()
+
+
+        def get_task_id_by_task_title(title):
+          for t in task.getPhase().getTasks():
+            if t.title == title:
+              return t
+          return None
+
+        position = position + 1
+        taskCur = get_task_id_by_task_title('${task_serviceconfiguration_title}')
+
+        # Clone the current task inside the same phase
+        sourceTask = taskCur
+        targetPhase = sourceTask.getPhase()
+
+        print "Cloning task:", sourceTask.getTitle(), "(", sourceTask.getType(), ")"
+
+        # Create new task object using the release API
+        taskType = str(sourceTask.getType())
+        print "Source task type: ", taskType
+        clonedTask = taskApi.newTask(taskType)
+
+        # Copy common fields
+        clonedTask.setTitle("Clone of - " + sourceTask.getTitle())
+
+        if sourceTask.getDescription():
+            clonedTask.setDescription(sourceTask.getDescription())
+            print "Description in cloned task: ", clonedTask.getDescription()
+
+        if sourceTask.getOwner():
+            clonedTask.setOwner(sourceTask.getOwner())
+            print "Owner in cloned task: ", clonedTask.Owner()
+
+        # Type-specific fields
+        if str(sourceTask.getType()) == "xlrelease.ScriptTask":
+            if hasattr(sourceTask, "getScript") and sourceTask.getScript():
+                clonedTask.setScript(sourceTask.getScript())
+                print "Cloned task script: ", clonedTask.script
+
+        elif str(sourceTask.getType()) == "xlrelease.UserInputTask":
+            # Copy variables (form fields)
+            for srcVar in sourceTask.getVariables():
+                print 'Source variable: ', srcVar
+                found = False
+                for tgtVar in clonedTask.getVariables():
+                    print 'Target variable: ', tgtVar
+                    if tgtVar.getKey() == srcVar.getKey():
+                        tgtVar.setValue(srcVar.getValue())
+                        found = True
+                        break
+                if not found:
+                    print 'Source variable: ', srcVar
+                    clonedTask.addVariable(srcVar)
+
+            # Copy prefilled input properties if present
+            if hasattr(sourceTask, "getInputProperties"):
+                for v in sourceTask.getInputProperties():
+                    print 'Input properties: ', v
+                    clonedTask.getInputProperties()[v.getKey()] = v.getValue()
+
+        # Add cloned task to the phase
+        phaseApi.addTask(targetPhase.id, clonedTask, position)
+
+        print "Cloned task created successfully"
+        print "Title:", clonedTask.getTitle()
+
+        print 'Task completed'
+    - name: "${task_clonetask_title}"
+      type: xlrelease.ScriptTask
+      description: Test description only
+      team: Release Admin
+      precondition: "${onlyrestarttask} is True"
+      script: |-
+        from com.xebialabs.xlrelease.api.v1 import TaskApi
+
+        position = -1;
+        tasks = task.getPhase().getTasks()
+        for idx, t in enumerate(tasks):
+          if t.getId() == task.getId():
+            position = idx
+            break
+
+        print "Current Task position: ", position
+
+        def CloneTasks(task_to_be_cloned, target_position):
+          # Clone the current task inside the same phase
+          sourceTask = task_to_be_cloned
+          targetPhase = sourceTask.getPhase()
+
+          print "Cloning task:", sourceTask.getTitle(), "(", sourceTask.getType(), ")"
+
+          # Create new task object using the release API
+          taskType = str(sourceTask.getType())
+          print "Source task type: ", taskType
+          clonedTask = taskApi.newTask(taskType)
+
+          # Copy common fields
+          clonedTask.setTitle("Clone of - " + sourceTask.getTitle())
+
+          if sourceTask.getDescription():
+              clonedTask.setDescription(sourceTask.getDescription())
+              print "Description in cloned task: ", clonedTask.Description()
+
+          if sourceTask.getOwner():
+              clonedTask.setOwner(sourceTask.getOwner())
+              print "Owner in cloned task: ", clonedTask.Owner()
+
+          # Type-specific fields
+          if str(sourceTask.getType()) == "xlrelease.ScriptTask":
+              if hasattr(sourceTask, "getScript") and sourceTask.getScript():
+                  clonedTask.setScript(sourceTask.getScript())
+                  print "Cloned task script: ", clonedTask.script
+
+          elif str(sourceTask.getType()) == "xlrelease.UserInputTask":
+              # Copy variables (form fields)
+              for key, value in sourceTask.getVariables().items():
+                  clonedTask.getVariables()[key] = value
+              # Copy prefilled input properties if present
+              if hasattr(sourceTask, "getInputProperties"):
+                  for key, value in sourceTask.getInputProperties().items():
+                      clonedTask.getInputProperties()[key] = value
+              # Copy labels
+              if sourceTask.getLabels():
+                  clonedTask.setLabels(sourceTask.getLabels())
+
+          # Add cloned task to the phase
+          phaseApi.addTask(targetPhase.id, clonedTask, target_position)
+
+          print "Cloned task created successfully"
+          print "Title:", clonedTask.getTitle()
+
+
+        def get_task_id_by_task_title(title):
+          for t in task.getPhase().getTasks():
+            if t.title == title:
+              return t
+          return None
+
+        position = position + 1
+        CloneTasks(get_task_id_by_task_title('${task_serviceconfiguration_title}'), position)
+        position = position + 1
+        CloneTasks(get_task_id_by_task_title('${task_spinnaker_title}'), position)
+        position = position + 1
+        CloneTasks(get_task_id_by_task_title('${task_triage_title}'), position)
+        position = position + 1
+        CloneTasks(get_task_id_by_task_title('${task_clonetask_title}'), position)
+        position = position + 1
+        CloneTasks(get_task_id_by_task_title('${task_restartphase_title}'), position)
+
+        print 'Task completed'
+    color: "#3d6c9e"
+  - phase: RELEASE USE ONLY
+    tasks:
+    - name: "${task_serviceconfiguration_title}"
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      team: Release Admin
+      variables:
+      - environments
+    - name: "${task_spinnaker_title}"
+      type: xlrelease.ScriptTask
+      script: print "Hello World"
+    - name: "${task_triage_title}"
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      team: Release Admin
+      variables:
+      - redeploymenttodevrequired
+      - onlyrestarttask
+    - name: "${task_restartphase_title}"
+      type: xlrelease.ScriptTask
+      precondition: "${onlyrestarttask} is False"
+      script: |-
+        from com.xebialabs.xlrelease.api.v1 import ReleaseApi
+        from com.xebialabs.xlrelease.api.v1 import TaskApi
+        from com.xebialabs.xlrelease.repository import PhaseVersion
+
+        # Current release ID is always available
+        release_id = release.id
+
+        phase_id =  '${captured_phase_id}'
+        phase_title =  '${captured_phase_title}'
+        task_id =  '${captured_task_id}'
+        task_title =  '${captured_task_title}'
+
+        target_phase = phaseApi.getPhase(phase_id)
+        target_task = taskApi.getTask(task_id)
+
+        # Restart the phase
+        print "Attempting to restart the phase and task with phaseId: %s phase title: %s taskId: %s task title: %s" % (phase_id, phase_title, task_id, task_title)
+        releaseApi.restartPhase(release, target_phase, target_task, PhaseVersion.LATEST, True)
+    - name: "${task_clonetask_title}"
+      type: xlrelease.ScriptTask
+      description: Test description only
+      team: Release Admin
+      precondition: "${onlyrestarttask} is True"
+      script: |-
+        from com.xebialabs.xlrelease.api.v1 import TaskApi
+
+        position = -1;
+        tasks = task.getPhase().getTasks()
+        for idx, t in enumerate(tasks):
+          if t.getId() == task.getId():
+            position = idx
+            break
+
+        def get_task_id_by_task_title(title):
+          for t in task.getPhase().getTasks():
+            if t.title == title:
+              return t.id
+          return None
+
+        position = position + 1
+        taskCurId = get_task_id_by_task_title('${task_serviceconfiguration_title}')
+
+        # Clone the current task inside the same phase
+        TaskApi.reopenTask(taskCurId, 'Resetting task for retry')
+
+        print "Cloned task created successfully"
+        print "Title:", clonedTask.getTitle()
+
+        print 'Task completed'
+    color: "#3d6c9e"
+  variables:
+  - type: xlrelease.StringVariable
+    key: captured_phase_id
+    showOnReleaseStart: false
+    label: Script
+    description: Script
+  - type: xlrelease.StringVariable
+    key: captured_phase_title
+    showOnReleaseStart: false
+    label: Script
+    description: Script
+  - type: xlrelease.StringVariable
+    key: captured_task_id
+    showOnReleaseStart: false
+    label: Script
+    description: Script
+  - type: xlrelease.StringVariable
+    key: captured_task_title
+    showOnReleaseStart: false
+    label: Script
+    description: Script
+  - type: xlrelease.BooleanVariable
+    key: redeploymenttodevrequired
+    requiresValue: false
+    showOnReleaseStart: false
+    label: redeploymenttodevrequired
+  - type: xlrelease.BooleanVariable
+    key: onlyrestarttask
+    requiresValue: false
+    showOnReleaseStart: false
+    label: Should only the task be restarted?
+  - type: xlrelease.ListStringVariable
+    key: environments
+    requiresValue: false
+    valueProvider:
+      type: xlrelease.ListOfStringValueProviderConfiguration
+      values:
+      - DEV
+      - QA
+      - UAT
+      - PROD
+  - type: xlrelease.StringVariable
+    key: task_serviceconfiguration_title
+    requiresValue: false
+    showOnReleaseStart: false
+    label: Service Configuration
+    value: Service Configuration
+  - type: xlrelease.StringVariable
+    key: task_spinnaker_title
+    requiresValue: false
+    showOnReleaseStart: false
+    label: Trigger Spinnaker pipeline
+    value: Trigger Spinnaker pipeline
+  - type: xlrelease.StringVariable
+    key: task_triage_title
+    requiresValue: false
+    showOnReleaseStart: false
+    label: Triage
+    value: Triage
+  - type: xlrelease.StringVariable
+    key: task_restartphase_title
+    requiresValue: false
+    showOnReleaseStart: false
+    label: Title
+    description: The title of the item.
+    value: Restart phase
+  - type: xlrelease.StringVariable
+    key: task_clonetask_title
+    requiresValue: false
+    showOnReleaseStart: false
+    label: Clone task
+    description: The title of the item.
+    value: Clone task
+  - type: xlrelease.IntegerVariable
+    key: redeploymentcount
+    requiresValue: false
+    showOnReleaseStart: false
+    value: 1
+  scriptUsername: releaseautomationuser
+  scriptUserPassword: !value "xlrelease_Release_Testing_scriptUserPassword"
+  riskProfile: Default risk profile
+  author: saurabh.gautam@westernunion.com

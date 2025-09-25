@@ -1,0 +1,115 @@
+# Exported from:        http://digitalai.wureachprod.awswuintranet.net/
+# Release version:      25.1.1-512.313
+# Date created:         Thu Sep 25 07:44:06 GMT 2025
+
+---
+apiVersion: xl-release/v1
+kind: Templates
+metadata:
+  path: /
+  home: Samples & Tutorials
+spec:
+- name: Custom
+  type: xlrelease.BlankDashboard
+  owner: saurabh.gautam@westernunion.com
+  tiles:
+  - name: Active releases
+    type: live.ReleasesTile
+    row: 0
+    col: 0
+    filters:
+    - type: xlrelease.DateFilter
+    - type: xlrelease.CompositeFilter
+      filters:
+      - type: xlrelease.FolderFilter
+        folder: ./
+  - name: Active releases by risk
+    type: live.ReleasesByRiskTile
+    row: 0
+    col: 2
+    filters:
+    - type: xlrelease.DateFilter
+    - type: xlrelease.CompositeFilter
+      filters:
+      - type: xlrelease.FolderFilter
+        folder: ./
+  - name: Active releases by status
+    type: live.ReleasesByStatusTile
+    row: 0
+    col: 4
+    filters:
+    - type: xlrelease.DateFilter
+    - type: xlrelease.CompositeFilter
+      filters:
+      - type: xlrelease.FolderFilter
+        folder: ./
+  - name: Avg. release duration
+    type: xlrelease.AvgReleaseDurationTile
+    row: 2
+    col: 0
+  - name: Avg. release duration over time
+    type: xlrelease.AvgReleaseDurationByMonthTile
+    row: 2
+    col: 1
+  - name: Avg. task duration
+    type: xlrelease.AvgTaskDurationTile
+    row: 2
+    col: 4
+  - name: Avg. task duration
+    type: xlrelease.AvgTaskDurationTile
+    row: 2
+    col: 5
+  - name: Completed releases
+    type: xlrelease.CompletedReleasesTile
+    row: 3
+    col: 0
+  - name: Current applications
+    type: deployment.CurrentApplicationsTile
+    row: 3
+    col: 4
+    filters:
+    - type: xlrelease.DateFilter
+  - name: Deployment activity
+    type: deployment.DeploymentsActivityTile
+    row: 3
+    col: 5
+    filters:
+    - type: xlrelease.DateFilter
+  - name: Deployments distribution
+    type: deployment.DeploymentsDistributionTile
+    row: 4
+    col: 0
+    filters:
+    - type: xlrelease.DateFilter
+  - name: Deployment success rate
+    type: deployment.DeploymentsSuccessRateTile
+    row: 4
+    col: 1
+    filters:
+    - type: xlrelease.DateFilter
+  - name: Number of releases
+    type: xlrelease.ReleasesByMonthTile
+    row: 4
+    col: 2
+  - name: Task efficiency
+    type: xlrelease.TaskEfficiencyTile
+    row: 6
+    col: 0
+  - name: Time spent by task category
+    type: xlrelease.TaskTimeSpentTile
+    row: 6
+    col: 2
+  - name: Top 10 longest releases
+    type: xlrelease.LongestReleasesTile
+    row: 8
+    col: 0
+  - name: Top 10 longest tasks
+    type: xlrelease.LongestTasksTile
+    row: 8
+    col: 3
+  - name: Total deployments
+    type: deployment.TotalDeploymentsTile
+    row: 5
+    col: 1
+    filters:
+    - type: xlrelease.DateFilter

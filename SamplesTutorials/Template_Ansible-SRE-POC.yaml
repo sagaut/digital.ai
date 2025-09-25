@@ -1,0 +1,56 @@
+# Exported from:        http://digitalai.wureachprod.awswuintranet.net/
+# Release version:      25.1.1-512.313
+# Date created:         Thu Sep 25 07:44:06 GMT 2025
+
+---
+apiVersion: xl-release/v1
+kind: Templates
+metadata:
+  path: /
+  home: Samples & Tutorials
+spec:
+- template: Ansible-SRE-POC
+  scheduledStartDate: 2024-11-26T03:30:00Z
+  phases:
+  - phase: New Phase
+    tasks:
+    - name: Add Creds
+      type: ansibleController.createCredential
+      ansibletower: Ansible SRE
+      apiToken: !value "ansibleController_createCredential_Add_Creds_apiToken"
+      job_template_id: "1002"
+      cred_id: 366
+    - name: Trigger Ansible Template
+      type: ansibleController.launchAndWait
+      ansibletower: Ansible SRE
+      apiToken: !value "ansibleController_launchAndWait_Trigger_Ansible_Template_apiToken"
+      job_template_id: "1002"
+      extra_vars: "{     \"number\": \"${ CRnumber }\",     \"user\": \"${ user}\"\
+        \   }"
+  variables:
+  - type: xlrelease.StringVariable
+    key: CRnumber
+    label: CR Number
+    description: "A string that represents a JSON or YAML formatted dictionary (with\
+      \ escaped parentheses) which includes variables given by the user, including\
+      \ answers to survey questions"
+  - type: xlrelease.StringVariable
+    key: credentials
+    label: Credential ID
+    description: "A string that represents a JSON or YAML formatted dictionary (with\
+      \ escaped parentheses) which includes variables given by the user, including\
+      \ answers to survey questions"
+    value: "336"
+  - type: xlrelease.StringVariable
+    key: user
+    label: User Email ID
+    description: "A string that represents a JSON or YAML formatted dictionary (with\
+      \ escaped parentheses) which includes variables given by the user, including\
+      \ answers to survey questions"
+    value: srinu.talari@wu.com
+  - type: xlrelease.IntegerVariable
+    key: inventory
+    label: Inventory ID
+    value: 77
+  riskProfile: Default risk profile
+  author: admin

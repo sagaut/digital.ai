@@ -1,0 +1,18 @@
+# Exported from:        http://digitalai.wureachprod.awswuintranet.net/
+# Release version:      25.1.1-512.313
+# Date created:         Thu Sep 25 07:44:05 GMT 2025
+
+---
+apiVersion: xl-release/v1
+kind: Templates
+metadata:
+  path: /
+  home: Samples & Tutorials
+spec:
+- pattern: Demo Delivery
+  plannedDuration: 720
+  stages:
+  - stage: New Stage
+    owner: saurabh.gautam@westernunion.com
+    team: Release Manager
+  - stage: New Stage (1)

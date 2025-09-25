@@ -1,0 +1,410 @@
+# Exported from:        http://digitalai.wureachprod.awswuintranet.net/
+# Release version:      25.1.1-512.313
+# Date created:         Thu Sep 25 07:44:05 GMT 2025
+
+---
+apiVersion: xl-release/v1
+kind: Templates
+metadata:
+  path: /
+  home: Samples & Tutorials
+spec:
+- template: Demo
+  scheduledStartDate: 2025-08-29T03:30:00Z
+  phases:
+  - phase: Pre release
+    tasks:
+    - name: Pre release checklist
+      type: xlrelease.GateTask
+      description: Confirm below checklist to proceed with the release.
+      owner: saurabh.gautam@westernunion.com
+      conditions:
+      - name: Release planning is complete?
+        type: xlrelease.GateCondition
+      - name: Scope of release is defined?
+        type: xlrelease.GateCondition
+      - name: Dependencies verified?
+        type: xlrelease.GateCondition
+    - name: Go/No Go for deployment to next environment
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: saurabh.gautam@westernunion.com
+      variables:
+      - environments
+    color: "#3d6c9e"
+  - phase: DEV
+    tasks:
+    - name: Set environment parameter to DEV
+      type: xlrelease.ScriptTask
+      script: "releaseVariables['currentenvironment'] = \"DEV\""
+    - name: Verify the services to be deployed
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: saurabh.gautam@westernunion.com
+      precondition: "True if \"${currentenvironment}\" in releaseVariables[\"environments\"\
+        ] else False"
+      variables:
+      - servicestobedeployed
+      - service1config
+      - service2config
+    - name: Deploy services to
+      type: xlrelease.ParallelGroup
+      precondition: "True if \"${currentenvironment}\" in releaseVariables[\"environments\"\
+        ] else False"
+      tasks:
+      - name: "Deploy Service 1 to ${currentenvironment}"
+        type: xlrelease.ScriptTask
+        facets:
+        - type: udm.DeploymentTaskFacet
+          variableMapping:
+            version: "${version}"
+          application: Service 1 App
+          environment: DEV_Demo
+        precondition: "True if \"Service 1\" in releaseVariables[\"servicestobedeployed\"\
+          ] else False"
+        script: |-
+          import time
+
+          time.sleep(10)
+      - name: "Deploy Service 2 to ${currentenvironment}"
+        type: xlrelease.ScriptTask
+        facets:
+        - type: udm.DeploymentTaskFacet
+          variableMapping:
+            version: "${version}"
+          application: Service 2 App
+          environment: DEV_Demo
+        precondition: "True if \"Service 2\" in releaseVariables[\"servicestobedeployed\"\
+          ] else False"
+        script: |-
+          import time
+
+          time.sleep(20)
+      - name: "Deploy Service 3 to ${currentenvironment}"
+        type: xlrelease.ScriptTask
+        facets:
+        - type: udm.DeploymentTaskFacet
+          variableMapping:
+            version: "${version}"
+          application: Service 3 App
+          environment: DEV_Demo
+        precondition: "True if \"Service 3\" in releaseVariables[\"servicestobedeployed\"\
+          ] else False"
+        script: |-
+          import time
+
+          time.sleep(30)
+    - name: "Email post deployment to ${currentenvironment}"
+      type: xlrelease.NotificationTask
+      precondition: "True if \"${currentenvironment}\" in releaseVariables[\"environments\"\
+        ] else False"
+      addresses:
+      - saurabh.gautam@westernunion.com
+      subject: "Deployment completed on ${currentenvironment}"
+      body: "Services deployed on ${currentenvironment}: ${servicestobedeployed}"
+      from: noreply@westernunion.com
+      priority: Normal
+    - name: Go/No Go for deployment to next environment
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: saurabh.gautam@westernunion.com
+      variables:
+      - environments
+    color: "#3d6c9e"
+  - phase: QA
+    tasks:
+    - name: Set environment parameter to QA
+      type: xlrelease.ScriptTask
+      script: "releaseVariables['currentenvironment'] = \"QA\""
+    - name: Verify the services to be deployed
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: saurabh.gautam@westernunion.com
+      precondition: "True if \"${currentenvironment}\" in releaseVariables[\"environments\"\
+        ] else False"
+      variables:
+      - servicestobedeployed
+      - service1config
+      - service2config
+    - name: Deploy services to
+      type: xlrelease.ParallelGroup
+      precondition: "True if \"${currentenvironment}\" in releaseVariables[\"environments\"\
+        ] else False"
+      tasks:
+      - name: "Deploy Service 1 to ${currentenvironment}"
+        type: xlrelease.ScriptTask
+        facets:
+        - type: udm.DeploymentTaskFacet
+          variableMapping:
+            version: "${version}"
+          application: Service 1 App
+          environment: QA_Demo
+        precondition: "True if \"Service 1\" in releaseVariables[\"servicestobedeployed\"\
+          ] else False"
+        script: |-
+          import time
+
+          time.sleep(10)
+      - name: "Deploy Service 2 to ${currentenvironment}"
+        type: xlrelease.ScriptTask
+        facets:
+        - type: udm.DeploymentTaskFacet
+          variableMapping:
+            version: "${version}"
+          application: Service 2 App
+          environment: QA_Demo
+        precondition: "True if \"Service 2\" in releaseVariables[\"servicestobedeployed\"\
+          ] else False"
+        script: |-
+          import time
+
+          time.sleep(20)
+      - name: "Deploy Service 3 to ${currentenvironment}"
+        type: xlrelease.ScriptTask
+        facets:
+        - type: udm.DeploymentTaskFacet
+          variableMapping:
+            version: "${version}"
+          application: Service 3 App
+          environment: QA_Demo
+        precondition: "True if \"Service 3\" in releaseVariables[\"servicestobedeployed\"\
+          ] else False"
+        script: |-
+          import time
+
+          time.sleep(30)
+    - name: "Email post deployment to ${currentenvironment}"
+      type: xlrelease.NotificationTask
+      precondition: "True if \"${currentenvironment}\" in releaseVariables[\"environments\"\
+        ] else False"
+      addresses:
+      - saurabh.gautam@westernunion.com
+      subject: "Deployment completed on ${currentenvironment}"
+      body: "Services deployed on ${currentenvironment}: ${servicestobedeployed}"
+      from: noreply@westernunion.com
+      priority: Normal
+    - name: Go/No Go for deployment to next environment
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: saurabh.gautam@westernunion.com
+      variables:
+      - environments
+    color: "#3d6c9e"
+  - phase: UAT
+    tasks:
+    - name: Set environment parameter to UAT
+      type: xlrelease.ScriptTask
+      script: "releaseVariables['currentenvironment'] = \"UAT\""
+    - name: Verify the services to be deployed
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: saurabh.gautam@westernunion.com
+      precondition: "True if \"${currentenvironment}\" in releaseVariables[\"environments\"\
+        ] else False"
+      variables:
+      - servicestobedeployed
+      - service1config
+      - service2config
+    - name: Deploy services to
+      type: xlrelease.ParallelGroup
+      precondition: "True if \"${currentenvironment}\" in releaseVariables[\"environments\"\
+        ] else False"
+      tasks:
+      - name: "Deploy Service 1 to ${currentenvironment}"
+        type: xlrelease.ScriptTask
+        facets:
+        - type: udm.DeploymentTaskFacet
+          variableMapping:
+            version: "${version}"
+          application: Service 1 App
+          environment: UAT_Demo
+        precondition: "True if \"Service 1\" in releaseVariables[\"servicestobedeployed\"\
+          ] else False"
+        script: |-
+          import time
+
+          time.sleep(10)
+      - name: "Deploy Service 2 to ${currentenvironment}"
+        type: xlrelease.ScriptTask
+        facets:
+        - type: udm.DeploymentTaskFacet
+          variableMapping:
+            version: "${version}"
+          application: Service 2 App
+          environment: UAT_Demo
+        precondition: "True if \"Service 2\" in releaseVariables[\"servicestobedeployed\"\
+          ] else False"
+        script: |-
+          import time
+
+          time.sleep(20)
+      - name: "Deploy Service 3 to ${currentenvironment}"
+        type: xlrelease.ScriptTask
+        facets:
+        - type: udm.DeploymentTaskFacet
+          variableMapping:
+            version: "${version}"
+          application: Service 3 App
+          environment: UAT_Demo
+        precondition: "True if \"Service 3\" in releaseVariables[\"servicestobedeployed\"\
+          ] else False"
+        script: |-
+          import time
+
+          time.sleep(30)
+    - name: "Email post deployment to ${currentenvironment}"
+      type: xlrelease.NotificationTask
+      precondition: "True if \"${currentenvironment}\" in releaseVariables[\"environments\"\
+        ] else False"
+      addresses:
+      - saurabh.gautam@westernunion.com
+      subject: "Deployment completed on ${currentenvironment}"
+      body: "Services deployed on ${currentenvironment}: ${servicestobedeployed}"
+      from: noreply@westernunion.com
+      priority: Normal
+    - name: Go/No Go for deployment to next environment
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: saurabh.gautam@westernunion.com
+      variables:
+      - environments
+    color: "#3d6c9e"
+  - phase: PROD
+    tasks:
+    - name: Set environment parameter to PROD
+      type: xlrelease.ScriptTask
+      script: "releaseVariables['currentenvironment'] = \"PROD\""
+    - name: Verify the services to be deployed
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: saurabh.gautam@westernunion.com
+      precondition: "True if \"${currentenvironment}\" in releaseVariables[\"environments\"\
+        ] else False"
+      variables:
+      - servicestobedeployed
+      - service1config
+      - service2config
+    - name: Deploy services to
+      type: xlrelease.ParallelGroup
+      precondition: "True if \"${currentenvironment}\" in releaseVariables[\"environments\"\
+        ] else False"
+      tasks:
+      - name: "Deploy Service 1 to ${currentenvironment}"
+        type: xlrelease.ScriptTask
+        facets:
+        - type: udm.DeploymentTaskFacet
+          variableMapping:
+            version: "${version}"
+          application: Service 1 App
+          environment: PROD_Demo
+        precondition: "True if \"Service 1\" in releaseVariables[\"servicestobedeployed\"\
+          ] else False"
+        script: |-
+          import time
+
+          time.sleep(10)
+      - name: "Deploy Service 2 to ${currentenvironment}"
+        type: xlrelease.ScriptTask
+        facets:
+        - type: udm.DeploymentTaskFacet
+          variableMapping:
+            version: "${version}"
+          application: Service 2 App
+          environment: PROD_Demo
+        precondition: "True if \"Service 2\" in releaseVariables[\"servicestobedeployed\"\
+          ] else False"
+        script: |-
+          import time
+
+          time.sleep(20)
+      - name: "Deploy Service 3 to ${currentenvironment}"
+        type: xlrelease.ScriptTask
+        facets:
+        - type: udm.DeploymentTaskFacet
+          variableMapping:
+            version: "${version}"
+          application: Service 3 App
+          environment: PROD_Demo
+        precondition: "True if \"Service 3\" in releaseVariables[\"servicestobedeployed\"\
+          ] else False"
+        script: |-
+          import time
+
+          time.sleep(30)
+    - name: "Email post deployment to ${currentenvironment}"
+      type: xlrelease.NotificationTask
+      precondition: "True if \"${currentenvironment}\" in releaseVariables[\"environments\"\
+        ] else False"
+      addresses:
+      - saurabh.gautam@westernunion.com
+      subject: "Deployment completed on {currentenvironment}"
+      body: "Services deployed on ${currentenvironment}: ${servicestobedeployed}"
+      from: noreply@westernunion.com
+      priority: Normal
+    - name: Go/No Go for deployment to next environment
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: saurabh.gautam@westernunion.com
+      variables:
+      - environments
+    color: "#3d6c9e"
+  - phase: TEST
+    color: "#3d6c9e"
+  variables:
+  - type: xlrelease.StringVariable
+    key: releasename
+    requiresValue: false
+    showOnReleaseStart: false
+    label: Release name
+    description: The release name
+  - type: xlrelease.StringVariable
+    key: version
+    label: Version
+    description: Version
+  - type: xlrelease.ListStringVariable
+    key: servicestobedeployed
+    label: Kindly select the services to be deployed
+    description: The services to be deployed as part of current release
+    valueProvider:
+      type: xlrelease.ListOfStringValueProviderConfiguration
+      values:
+      - Service 1
+      - Service 2
+      - Service 3
+  - type: xlrelease.StringVariable
+    key: currentenvironment
+    showOnReleaseStart: false
+    label: current environment
+    description: current environment
+    value: DEV
+  - type: xlrelease.ListStringVariable
+    key: environments
+    label: Environments
+    description: Environments on which the change needs to be deployed
+    valueProvider:
+      type: xlrelease.ListOfStringValueProviderConfiguration
+      values:
+      - DEV
+      - QA
+      - UAT
+      - PROD
+  - type: xlrelease.MapStringStringVariable
+    key: service1config
+    label: Service 1 configuration
+    description: Service 1 configuration
+    value:
+      Build number: "100029"
+      Spinnaker pipeline: https://armory-spinnaker.wureachprod.awswuintranet.net/#/executions?pipeline=1P-service
+      Service name: SpinnakerService1
+  - type: xlrelease.MapStringStringVariable
+    key: service2config
+    label: Service 2 configuration
+    description: Service 2 configuration
+    value:
+      Service name: SpinnakerService2
+      Spinnaker pipeline: https://armory-spinnaker.wureachprod.awswuintranet.net/#/executions?pipeline=1P-service
+      Build number: "45007"
+  scriptUsername: releaseautomationuser
+  scriptUserPassword: !value "xlrelease_Release_Demo_scriptUserPassword"
+  riskProfile: Default risk profile
+  author: saurabh.gautam@westernunion.com

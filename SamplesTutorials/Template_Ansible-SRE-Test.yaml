@@ -1,0 +1,38 @@
+# Exported from:        http://digitalai.wureachprod.awswuintranet.net/
+# Release version:      25.1.1-512.313
+# Date created:         Thu Sep 25 07:44:05 GMT 2025
+
+---
+apiVersion: xl-release/v1
+kind: Templates
+metadata:
+  path: /
+  home: Samples & Tutorials
+spec:
+- template: Ansible-SRE-Test
+  scheduledStartDate: 2024-11-26T03:30:00Z
+  phases:
+  - phase: New Phase
+    tasks:
+    - name: Ansibel-SRE-Test
+      type: ansibleController.launchAndWait
+      ansibletower: Ansible SRE
+      apiToken: !value "ansibleController_launchAndWait_Ansibel_SRE_Test_apiToken"
+      job_template_id: "1002"
+      extra_vars: "{     \"inventory\": \"${ inventoryid }\",     \"credentials\"\
+        : [     \"${ credentialid }\"   ]   }"
+  variables:
+  - type: xlrelease.StringVariable
+    key: credentialid
+    label: Extra_vars
+    description: "A string that represents a JSON or YAML formatted dictionary (with\
+      \ escaped parentheses) which includes variables given by the user, including\
+      \ answers to survey questions"
+  - type: xlrelease.StringVariable
+    key: inventoryid
+    label: Extra_vars
+    description: "A string that represents a JSON or YAML formatted dictionary (with\
+      \ escaped parentheses) which includes variables given by the user, including\
+      \ answers to survey questions"
+  riskProfile: Default risk profile
+  author: admin

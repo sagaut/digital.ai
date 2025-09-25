@@ -1,0 +1,32 @@
+# Exported from:        http://digitalai.wureachprod.awswuintranet.net/
+# Release version:      25.1.1-512.313
+# Date created:         Thu Sep 25 07:44:06 GMT 2025
+
+---
+apiVersion: xl-release/v1
+kind: Applications
+metadata:
+  path: /
+  home: Samples & Tutorials
+spec:
+- name: Service 1 App
+  type: xlrelease.Application
+  environments:
+  - PROD_Demo
+  - DEV_Demo
+  - UAT_Demo
+  - QA_Demo
+- name: Service 2 App
+  type: xlrelease.Application
+  environments:
+  - PROD_Demo
+  - QA_Demo
+  - DEV_Demo
+  - UAT_Demo
+- name: Service 3 App
+  type: xlrelease.Application
+  environments:
+  - PROD_Demo
+  - DEV_Demo
+  - UAT_Demo
+  - QA_Demo

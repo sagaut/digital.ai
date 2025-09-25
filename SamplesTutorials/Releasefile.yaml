@@ -1,0 +1,34 @@
+# Exported from:        http://digitalai.wureachprod.awswuintranet.net/
+# Release version:      25.1.1-512.313
+# Date created:         Thu Sep 25 07:44:06 GMT 2025
+
+---
+apiVersion: xl-release/v1
+kind: Import
+spec:
+  imports:
+  - ' Green.yaml'
+  - Applications.yaml
+  - Dashboard_Custom.yaml
+  - Dashboard_Deployments.yaml
+  - Dashboard_Release statistics.yaml
+  - Environments.yaml
+  - Notifications.yaml
+  - Pattern_Demo Delivery.yaml
+  - Permissions.yaml
+  - Template_Ansible POC.yaml
+  - Template_Ansible-SRE-POC.yaml
+  - Template_Ansible-SRE-Test.yaml
+  - Template_Ansible_demo.yaml
+  - Template_Configure Release.yaml
+  - Template_Demo.yaml
+  - "Template_Deployment pattern: Canary Release.yaml"
+  - Template_DevOps_Test_job.yaml
+  - Template_Guided Tour for Release Managers.yaml
+  - Template_Sample Release Template with Digital.ai Deploy.yaml
+  - Template_Sample Release Template.yaml
+  - Template_Testing.yaml
+  - Template_Trigger-Ansible-JobTemplate.yaml
+  - Template_Trigger-Spinnaker-Pipeline.yaml
+  - Template_Welcome to Release!.yaml
+  - Template_ansible_snow_validation_template.yaml

@@ -1,0 +1,21 @@
+# Exported from:        http://digitalai.wureachprod.awswuintranet.net/
+# Release version:      25.1.1-512.313
+# Date created:         Thu Sep 25 07:44:06 GMT 2025
+
+---
+apiVersion: xl-release/v1
+kind: Templates
+metadata:
+  path: /
+  home: Samples & Tutorials
+spec:
+- template: Ansible POC
+  scheduledStartDate: 2024-11-18T03:30:00Z
+  phases:
+  - phase: New Phase
+    tasks:
+    - name: POC Run Ansible Job template
+      type: ansibleController.runJobTemplate
+      ansibletower: AnsibleDR
+  riskProfile: Default risk profile
+  author: admin

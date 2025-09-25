@@ -1,0 +1,29 @@
+# Exported from:        http://digitalai.wureachprod.awswuintranet.net/
+# Release version:      25.1.1-512.313
+# Date created:         Thu Sep 25 07:44:05 GMT 2025
+
+---
+apiVersion: xl-release/v1
+kind: Templates
+metadata:
+  path: /
+  home: Samples & Tutorials
+spec:
+- template: Trigger-Spinnaker-Pipeline
+  description: Sample Pipeline integration between DigitalAI and Spinnaker
+  scheduledStartDate: 2024-11-14T03:30:00Z
+  phases:
+  - phase: New Phase
+    tasks:
+    - name: POC-Ansible-Job
+      type: webhook.JsonWebhook
+      URL: https://oes-prd.wureachprod.awswuintranet.net/gate/webhooks/webhook/POC-Ansible-Job
+      method: POST
+    - name: Wait stage
+      type: webhook.WaitForJsonEvent
+    - name: Get Results
+      type: webhook.JsonWebhook
+    - name: Get pipeline status
+      type: webhook.JsonWebhook
+  riskProfile: Default risk profile
+  author: admin
