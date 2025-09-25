@@ -1,0 +1,35 @@
+# Exported from:        http://digitalai.wureachprod.awswuintranet.net/
+# Release version:      25.1.1-512.313
+# Date created:         Thu Sep 25 10:31:58 GMT 2025
+
+---
+apiVersion: xl-release/v1
+kind: Templates
+metadata:
+  path: /
+  home: Utility
+spec:
+- template: ServiceNow
+  scheduledStartDate: 2025-09-17T03:30:00Z
+  phases:
+  - phase: ServiceNow
+    tasks:
+    - name: Find Change Request
+      type: servicenow.FindChangeRequestByTicket
+      servicenowServer: ServiceNow-Test
+      ticket: CHG0308478
+    - name: Create Change Request
+      type: servicenow.CreateChangeRequest
+      servicenowServer: ServiceNow-Test
+      shortDescription: Test ServiceNow/Digital.ai integration
+      ^description: This is test change request created from Digital.ai release.
+    - name: Mark release as complete
+      type: xlrelease.Task
+      team: Release Admin
+    color: "#3d6c9e"
+  tags:
+  - ServiceNow
+  scriptUsername: releaseautomationuser
+  scriptUserPassword: !value "xlrelease_Release_ServiceNow_scriptUserPassword"
+  riskProfile: Default risk profile
+  author: saurabh.gautam@westernunion.com

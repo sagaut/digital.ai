@@ -1,0 +1,89 @@
+# Exported from:        http://digitalai.wureachprod.awswuintranet.net/
+# Release version:      25.1.1-512.313
+# Date created:         Thu Sep 25 10:31:58 GMT 2025
+
+---
+apiVersion: xl-release/v1
+kind: Permissions
+metadata:
+  path: /
+  home: Utility
+spec:
+- directory: "."
+  teams:
+  - name: Folder Owner
+    users:
+    - saurabh.gautam@westernunion.com
+    permissions:
+    - delivery_pattern#view
+    - delivery_pattern#edit
+    - app_pipelines#view
+    - folder#view_security
+    - folder#apply_changes
+    - folder#edit
+    - delivery#edit_tracked_item
+    - group#view
+    - folder#edit_security
+    - delivery#edit
+    - folder#edit_notifications
+    - folder#view_versions
+    - dashboard#edit
+    - folder#edit_configuration
+    - group#edit
+    - folder#edit_variables
+    - folder#view
+    - dashboard#view
+    - folder#generate_configuration
+    - delivery#view
+    - folder#edit_versions
+    - app_pipelines#edit
+  - name: Template Owner
+    users:
+    - saurabh.gautam@westernunion.com
+    permissions:
+    - template#lock_task
+    - template#edit_failure_handler
+    - template#edit
+    - app_pipelines#view
+    - template#edit_security
+    - template#edit_precondition
+    - template#create_release_other_folder
+    - trigger#view_trigger
+    - folder#view
+    - template#edit_triggers
+    - template#create_release
+    - template#view
+  - name: Release Admin
+    users:
+    - saurabh.gautam@westernunion.com
+    permissions:
+    - release#edit_task_description
+    - release#edit_task_script
+    - release#lock_task
+    - release#edit_task_dates
+    - release#reassign_lock_task
+    - release#edit
+    - release#edit_security
+    - workflow#abort_execution
+    - workflow#view_execution
+    - folder#view
+    - release#view
+    - app_pipelines#view
+    - release#restart_phase
+    - release#edit_task_attachments
+    - trigger#edit_trigger
+    - trigger#view_trigger
+    - release#abort
+    - release#edit_failure_handler
+    - release#edit_task_tags
+    - release#edit_task
+    - release#start
+    - workflow#start_execution
+    - release#edit_blackout
+    - release#edit_precondition
+    - release#advance_task_transition
+    - release#edit_task_input_output_properties
+    - release#task_transition
+    - release#reassign_task
+    - release#edit_task_flag
+    - release#edit_task_configuration_facet
